@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Adding Custom Link to SiteActions</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives code to open a SPList.</Description>
+      <Shortcut>createnewsiteactions</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Declarations>
+        <Literal>
+          <ID>YourID</ID>
+          <ToolTip>Replace with your CustomAction ID.</ToolTip>
+          <Default>"ID"</Default>
+        </Literal>
+        <Literal>
+          <ID>Permissions</ID>
+          <ToolTip>Replace with the member name available at http://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spbasepermissions.aspx </ToolTip>
+          <Default>"Member name"</Default>
+        </Literal>
+        <Literal>
+          <ID>GroupID</ID>
+          <ToolTip>Replace with the Custom Action Group IDs available at http://msdn.microsoft.com/en-us/library/bb802730.aspx </ToolTip>
+          <Default>"GroupID"</Default>
+        </Literal>
+        <Literal>
+          <ID>Location</ID>
+          <ToolTip>Replace with the Location available at http://msdn.microsoft.com/en-us/library/bb802730.aspx </ToolTip>
+          <Default>"Location"</Default>
+        </Literal>
+        <Literal>
+          <ID>Title</ID>
+          <ToolTip>Replace with the Custom Action Title </ToolTip>
+          <Default>"Title"</Default>
+        </Literal>
+        <Literal>
+          <ID>URL</ID>
+          <ToolTip>Replace with the Custom Action link target URL. The URL tokens could be found at http://msdn.microsoft.com/en-us/library/ms431831.aspx  </ToolTip>
+          <Default>"URL"</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[
+        // Add this to any Elements.xml
+        
+        // Rights: Possible values could be found at  http://msdn.microsoft.com/en-us/library/microsoft.sharepoint.spbasepermissions.aspx
+        // GroupId: Possible values could be found at  http://msdn.microsoft.com/en-us/library/bb802730.aspx
+        // Location: Possible values could be found at  http://msdn.microsoft.com/en-us/library/bb802730.aspx
+        // UrlAction: Possible URL tokens could be found at http://msdn.microsoft.com/en-us/library/ms431831.aspx
+        
+        <?xml version="1.0" encoding="utf-8"?>
+          <Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+            <!-- In Site Actions -->
+            <CustomAction
+               Id=$YourID$
+               Rights=$Permissions$
+               GroupId=$GroupID$
+               Location=$Location$
+               Sequence="1000"
+               Title=$Title$>
+              <UrlAction Url=$URL$/>
+            </CustomAction>
+          </Elements>
+          ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
+
+
+

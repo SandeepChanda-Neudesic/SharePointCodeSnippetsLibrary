@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Change Default Masterpages</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives code to Change your default masterpage and system master page.</Description>
+      <Shortcut>changemaster</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Code Language="csharp">
+        <![CDATA[const string customMasterPageName = "CustomMaster.master";
+            const string systemMasterPageName = "CustomSystemMaster.master";
+
+             // Code to change the Default Master page and Default System Master Pages.
+             // Put this code in any FeatureActivated event
+
+            SPSite site = properties.Feature.Parent as SPSite;
+            SPWeb web = site.OpenWeb();
+            if (web != null)
+            {
+                Uri customMasterPageUri = new Uri(web.Url + "/_catalogs/masterpage/" + customMasterPageName);
+                Uri systemMasterPageUri = new Uri(web.Url + "/_catalogs/masterpage/" + systemMasterPageName);
+                if (web.GetFile(customMasterPageUri.AbsoluteUri).Exists)
+                {
+                    // Save the previous master page URL for easy restore during deativation
+                    web.DeleteProperty("OldDefaultMasterUrl");
+                    if (!web.Properties.ContainsKey("OldDefaultMasterUrl"))
+                    {
+                        web.AddProperty("OldDefaultMasterUrl", web.CustomMasterUrl);
+                    }
+                    else
+                    {
+                        web.Properties["OldDefaultMasterUrl"] = web.CustomMasterUrl;
+                    }
+
+                    web.CustomMasterUrl = customMasterPageUri.AbsolutePath;
+
+                }
+
+                if (web.GetFile(systemMasterPageUri.AbsoluteUri).Exists)
+                {
+                    // Save the previous master page URL for easy restore during deativation
+                    web.DeleteProperty("OldDefaultSystemMasterUrl");
+
+                    if (!web.Properties.ContainsKey("OldDefaultSystemMasterUrl"))
+                    {
+                        web.AddProperty("OldDefaultSystemMasterUrl", web.MasterUrl);
+                    }
+                    else
+                    {
+                        web.Properties["OldDefaultSystemMasterUrl"] = web.MasterUrl;
+                    }
+
+
+                    web.MasterUrl = systemMasterPageUri.AbsolutePath;
+
+                }
+
+
+
+                web.Update();
+            }
+
+            // Code to Undo changing Default Master page and System Master Page.
+            // Put this code in any FeatureDeactivating event
+            
+            SPSite site = properties.Feature.Parent as SPSite;
+            SPWeb web = site.OpenWeb();
+            if (web != null)
+            {
+                //Revert the default master page to the previous
+
+                web.MasterUrl = web.AllProperties["OldDefaultSystemMasterUrl"].ToString();
+                web.CustomMasterUrl = web.AllProperties["OldDefaultMasterUrl"].ToString();
+                web.DeleteProperty("OldDefaultMasterUrl");
+                web.DeleteProperty("OldDefaultSystemMasterUrl");
+                web.Update();
+            }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

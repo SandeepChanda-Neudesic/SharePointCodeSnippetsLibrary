@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Create Logging Service</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives code Logging Service for your project.</Description>
+      <Shortcut>Createloggingservice</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Declarations>
+        <Literal>
+          <ID>projectNameNS</ID>
+          <ToolTip>Replace with your Project Name.</ToolTip>
+          <Default>"projectName"</Default>
+        </Literal>
+        <Literal>
+          <ID>projectName</ID>
+          <ToolTip>Replace with your Project Name.</ToolTip>
+          <Default>"projectName"</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[
+        
+        // using Microsoft.SharePoint.Administration;
+        // using Microsoft.SharePoint.Security;
+        
+        namespace $projectNameNS$.Common.Diagnostics
+        {
+            public static class Logger
+            {
+                public static void Trace(LoggingService.Category categoryName, TraceSeverity severity, string message, params object[] data)
+                {
+                    Trace(0, categoryName, severity, message, data);
+                }
+
+                public static void Trace(uint tagId, LoggingService.Category category, TraceSeverity severity, string message, params object[] data)
+                {
+                    LoggingService localService = null;
+
+                    try
+                    {
+                        localService = LoggingService.Local;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(String.Format("ERROR: Failed to log Trace message: {0}", ex.Message));
+                    }
+
+                    if (localService != null)
+                    {
+                        localService.WriteTrace(tagId, localService[category.ToString()], severity, message, data);
+                    }
+
+                    WriteDebug(category, severity.ToString(), message, data);
+
+                }
+
+                public static void WriteException(LoggingService.Category categoryName, Exception ex)
+                {
+                    if (ex != null)
+                    {
+                        WriteEvent(categoryName,
+                                    EventSeverity.ErrorCritical,
+                                    "Exception thrown >>>Type: [{0}], Message: [{1}]",
+                                    ex.GetType().Name,
+                                    ex.Message);
+                    }
+                }
+
+                public static void WriteEvent(LoggingService.Category categoryName, EventSeverity severity, string message, params object[] data)
+                {
+                    WriteEvent(0, categoryName, severity, message, data);
+                }
+
+                public static void WriteEvent(ushort tagId, LoggingService.Category category, EventSeverity severity, string message, params object[] data)
+                {
+                    LoggingService localService = null;
+
+                    try
+                    {
+                        localService = LoggingService.Local;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(String.Format("ERROR: Failed to log Event message: {0}", ex.Message));
+                    }
+
+                    if (localService != null)
+                    {
+                        localService.WriteEvent(tagId, localService[category.ToString()], severity, message, data);
+                    }
+
+                    WriteDebug(category, severity.ToString(), message, data);
+                }
+
+                public static void WriteDebug(LoggingService.Category categoryName, string severity, string message, params object[] data)
+                {
+        #if DEBUG
+                    if (null != data && data.Length > 0)
+                    {
+                        message = String.Format(CultureInfo.InvariantCulture, message, data);
+                    }
+
+                    Debug.WriteLine(String.Format("[{0}][{1}] {2}", categoryName, severity, message));
+                    Console.WriteLine(String.Format("[{0}][{1}] {2}", categoryName, severity, message));
+        #endif
+                }
+            }
+
+            public sealed class LoggingService : SPDiagnosticsServiceBase
+            {
+                private const string AreaName = $projectName$;
+
+                public enum Category
+                {
+                    Infrastructure,
+                    Models,
+                    UI,
+                    Webparts,
+                    TimerJob
+                };
+
+
+                [SharePointPermission(SecurityAction.InheritanceDemand, ObjectModel = true)]
+                [SharePointPermission(SecurityAction.LinkDemand, ObjectModel = true)]
+                public LoggingService()
+                    : base("LoggingService", SPFarm.Local)
+                {
+                }
+
+
+                [SharePointPermission(SecurityAction.InheritanceDemand, ObjectModel = true)]
+                [SharePointPermission(SecurityAction.LinkDemand, ObjectModel = true)]
+                public LoggingService(string name, SPFarm farm)
+                    : base(name, farm)
+                {
+                }
+
+
+                protected override bool HasAdditionalUpdateAccess()
+                {
+                    // Without this SPDiagnosticsServiceBase.GetLocal<MyDiagnosticsService>() throws a SecurityException, see http://share2010.wordpress.com/tag/sppersistedobject/
+                    return true;
+                }
+
+
+                /// <summary>
+                /// Registers the class.  
+                /// </summary>
+                [SharePointPermission(SecurityAction.InheritanceDemand, ObjectModel = true)]
+                [SharePointPermission(SecurityAction.LinkDemand, ObjectModel = true)]
+                public static void Register()
+                {
+                    LoggingService loggingService = new LoggingService(String.Empty, SPFarm.Local);
+                    loggingService.Update(true);
+                }
+
+                /// <summary>
+                /// Unregisters the class. 
+                /// </summary>
+                [SharePointPermission(SecurityAction.InheritanceDemand, ObjectModel = true)]
+                [SharePointPermission(SecurityAction.LinkDemand, ObjectModel = true)]
+                public static void Unregister()
+                {
+                    LoggingService loggingService = LoggingService.Local;
+                    if (loggingService != null)
+                    {
+                        loggingService.Delete();
+                    }
+                }
+
+                /// <summary>
+                /// Local Server - does not run farm-wide
+                /// </summary>
+                public static LoggingService Local
+                {
+                    get
+                    {
+                        return SPDiagnosticsServiceBase.GetLocal<LoggingService>();
+                    }
+                }
+
+                /// <summary>
+                /// 
+                /// </summary>
+                /// <returns></returns>
+                protected override IEnumerable<SPDiagnosticsArea> ProvideAreas()
+                {
+                    List<SPDiagnosticsCategory> categories = new List<SPDiagnosticsCategory>();
+
+                    foreach (string categoryName in Enum.GetNames(typeof(Category)))
+                    {
+                        uint categoryId = (uint)(int)Enum.Parse(typeof(Category), categoryName);
+                        categories.Add(new SPDiagnosticsCategory(categoryName, TraceSeverity.Monitorable, EventSeverity.Error, 0, categoryId));
+                    }
+
+                    yield return new SPDiagnosticsArea(AreaName, categories);
+                }
+
+                internal SPDiagnosticsCategory this[string categoryName]
+                {
+                    get
+                    {
+                        return Areas[AreaName].Categories[categoryName];
+                    }
+                }
+            }
+        }
+      
+        ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
+

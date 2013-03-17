@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Create Site Groups</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives code to add new SIte Group to web.</Description>
+      <Shortcut>createsitegroup</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Declarations>
+        <Literal>
+          <ID>webTemplateName</ID>
+          <ToolTip>Replace with your site URL.</ToolTip>
+          <Default>"webTemplateName"</Default>
+        </Literal>
+        <Literal>
+          <ID>splist</ID>
+          <ToolTip>Replace with your list name.</ToolTip>
+          <Default>"MyCustomList"</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[
+        
+         // add this code to FeatureActivated event of a Web scopped feature
+         
+         SPSecurity.RunWithElevatedPrivileges(delegate()
+            {
+                SPWeb web = properties.GetWeb();
+
+                if (web.WebTemplate.ToUpper() == $webTemplateName$.ToUpper())
+                {
+                    string webTitle = web.Title;
+
+                    string leaderGroupName = webTitle + " Leaders";
+                    string ownersGroupName = webTitle + " Owners";
+                    string membersGroupName = webTitle + " Members";
+                    string visitorsGroupName = webTitle + " Visitors";
+
+                    web.AllowUnsafeUpdates = true;
+                    web.BreakRoleInheritance(false);
+
+                    web.SiteGroups.Add(leaderGroupName, web.CurrentUser, web.CurrentUser, "Contains the leaders for this warehouse");
+                    web.SiteGroups.Add(ownersGroupName, web.CurrentUser, web.CurrentUser, "Contains the Owners for this warehouse");
+                    web.SiteGroups.Add(membersGroupName, web.CurrentUser, web.CurrentUser, "Contains the members for this warehouse");
+                    web.SiteGroups.Add(visitorsGroupName, web.CurrentUser, web.CurrentUser, "Contains the visitors for this warehouse");
+
+                    SPGroup group = web.SiteGroups[leaderGroupName];
+                    SPRoleAssignment roleAssigment = new SPRoleAssignment(group);
+                    SPRoleDefinition roleDefinitionAdmin = web.RoleDefinitions.GetByType(SPRoleType.Administrator);
+                    roleAssigment.RoleDefinitionBindings.Add(roleDefinitionAdmin);
+                    web.RoleAssignments.Add(roleAssigment);
+
+                    SPGroup groupOwners = web.SiteGroups[ownersGroupName];
+                    SPRoleAssignment roleAssigmentOwners = new SPRoleAssignment(groupOwners);
+                    SPRoleDefinition roleDefinitionOwners = web.RoleDefinitions.GetByType(SPRoleType.Administrator);
+                    roleAssigmentOwners.RoleDefinitionBindings.Add(roleDefinitionOwners);
+                    web.RoleAssignments.Add(roleAssigmentOwners);
+
+                    SPGroup groupMembers = web.SiteGroups[membersGroupName];
+                    SPRoleAssignment roleAssigmentMembers = new SPRoleAssignment(groupMembers);
+                    SPRoleDefinition roleDefinitionMembers = web.RoleDefinitions.GetByType(SPRoleType.Contributor);
+                    roleAssigmentMembers.RoleDefinitionBindings.Add(roleDefinitionMembers);
+                    web.RoleAssignments.Add(roleAssigmentMembers);
+
+                    SPGroup groupVisitors = web.SiteGroups[visitorsGroupName];
+                    SPRoleAssignment roleAssigmentVisitors = new SPRoleAssignment(groupVisitors);
+                    SPRoleDefinition roleDefinitionVisitor = web.RoleDefinitions.GetByType(SPRoleType.Reader);
+                    roleAssigmentVisitors.RoleDefinitionBindings.Add(roleDefinitionVisitor);
+                    web.RoleAssignments.Add(roleAssigmentVisitors);
+
+                    web.Update();
+                    web.AllowUnsafeUpdates = false;
+                }
+            });
+         
+         ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Change Welcome Page</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives code to change the Welcome Page of a Publishing Site.</Description>
+      <Shortcut>changewelcomepage</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Declarations>
+        <Literal>
+          <ID>pageURL</ID>
+          <ToolTip>Replace with your Home Page URL.</ToolTip>
+          <Default>"pageURL"</Default>
+        </Literal>
+        <Literal>
+          <ID>splist</ID>
+          <ToolTip>Replace with your list name.</ToolTip>
+          <Default>"MyCustomList"</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[
+         
+         // add the following code to FeatureActivated event
+         
+         SPWeb web = properties.GetWeb();
+        //Setting the welcome page as home.aspx
+        SPFolder rootFolder = web.RootFolder;
+
+        // for example: rootFolder.WelcomePage = "Pages/home.aspx";
+        
+        rootFolder.WelcomePage = $pageURL$;
+        rootFolder.Update();
+
+        PublishingWeb pubWeb = null;
+        if (PublishingWeb.IsPublishingWeb(web))
+        {
+        pubWeb = PublishingWeb.GetPublishingWeb(web);
+
+        }
+        
+        // add the following code to FeatureDeactivating event
+        
+        SPWeb web = properties.GetWeb();
+            //Setting the welcome page as default.aspx
+            SPFolder rootFolder = web.RootFolder;
+
+            // for example: rootFolder.WelcomePage = "Pages/home.aspx"; 
+            rootFolder.WelcomePage = $pageURL$;
+            rootFolder.Update();
+            if (web != null)
+            {
+                PublishingWeb pubWeb = null;
+                if (PublishingWeb.IsPublishingWeb(web))
+                {
+                    pubWeb = PublishingWeb.GetPublishingWeb(web);
+
+                    foreach (SPListItem currentItem in pubWeb.PagesList.Items)
+                    {
+                        if (PublishingPage.IsPublishingPage(currentItem))
+                        {
+                            PublishingPage page = PublishingPage.GetPublishingPage(currentItem);
+
+                            if (page.Name != pubWeb.DefaultPage.Name)
+                            {
+                                try
+                                {
+                                    currentItem.File.Delete();
+                                }
+                                //For Welcome Page
+                                catch { }
+                            }
+                        }
+                    }
+                }
+
+            }
+            
+            // Extension class for GetWeb method
+            
+             public static class Extensions
+            {
+                /// <summary>
+                /// Gets the web.
+                /// </summary>
+                /// <param name="properties">The properties.</param>
+                /// <returns></returns>
+                public static SPWeb GetWeb(this SPFeatureReceiverProperties properties)
+                {
+                    SPWeb site;
+                    if (properties.Feature.Parent is SPWeb)
+                    {
+                        site = (SPWeb)properties.Feature.Parent;
+                    }
+                    else if (properties.Feature.Parent is SPSite)
+                    {
+                        site = ((SPSite)properties.Feature.Parent).RootWeb;
+                    }
+                    else
+                    {
+                        throw new Exception("Unable to retrieve SPWeb - this feature is not Site or Web-scoped.");
+                    }
+                    return site;
+                }
+
+            }
+         
+         ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
+
+ 

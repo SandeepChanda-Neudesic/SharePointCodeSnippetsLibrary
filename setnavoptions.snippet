@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Override Navigation Settings using Code</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives code to Override Navigation Settings programatically.</Description>
+      <Shortcut>setnavoptions</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Code Language="csharp">
+        <![CDATA[
+        
+        // Let these constants at global scope in the Feature EventReceiver file
+        
+        // Common (applies to both global and current navigation):
+        public const string IncludeSubsitesKey = "__IncludeSubSitesInNavigation";
+        public const string IncludePagesKey = "__IncludePagesInNavigation";
+
+        // Global navigation:
+        public const string GlobalNavigationDynamicChildLimitKey = "__GlobalDynamicChildLimit";
+
+        // Current navigation:
+        public const string CurrentNavigationInheritKey = "__InheritCurrentNavigation";
+        public const string CurrentNavigationShowSiblingsKey = "__NavigationShowSiblings";
+        public const string CurrentNavigationOrderingMethodKey = "__NavigationOrderingMethod";
+        public const string CurrentNavigationAutomaticSortingMethodKey = "__NavigationAutomaticSortingMethod";
+        public const string CurrentNavigationSortAscendingKey = "__NavigationSortAscending";
+        public const string CurrentNavigationDynamicChildLimitKey = "__CurrentDynamicChildLimit";
+        
+        // Have the below class added to the file
+        
+        public static class Extensions
+        {
+            /// <summary>
+            /// Gets the web.
+            /// </summary>
+            /// <param name="properties">The properties.</param>
+            /// <returns></returns>
+            public static SPWeb GetWeb(this SPFeatureReceiverProperties properties)
+            {
+                SPWeb site;
+                if (properties.Feature.Parent is SPWeb)
+                {
+                    site = (SPWeb)properties.Feature.Parent;
+                }
+                else if (properties.Feature.Parent is SPSite)
+                {
+                    site = ((SPSite)properties.Feature.Parent).RootWeb;
+                }
+                else
+                {
+                    throw new Exception("Unable to retrieve SPWeb - this feature is not Site or Web-scoped.");
+                }
+                return site;
+            }
+
+        }
+
+        // Add the below code to FeatureActivated event
+        // We are adding the properties to the web property bag.
+        // We can add all the properties according to our need.
+        
+            SPSecurity.RunWithElevatedPrivileges(delegate()
+           {
+
+               SPWeb web = properties.GetWeb();
+
+               web.AllowUnsafeUpdates = true;
+
+               if (!web.IsRootWeb)
+               {
+                   web.Navigation.UseShared = true;
+
+                   if (web.GetProperty(CurrentNavigationInheritKey) != null)
+                       web.DeleteProperty(CurrentNavigationInheritKey);
+
+                   web.AddProperty(CurrentNavigationInheritKey, bool.FalseString);
+
+                   web.Update();
+
+                   web.AllowUnsafeUpdates = false;
+               }
+           });
+           
+           ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

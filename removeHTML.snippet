@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Remove HTML</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives a public function which takes string which could have HTML tags and return plain text removing HTML tags.</Description>
+      <Shortcut>removeHTML</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Code Language="csharp">
+        <![CDATA[
+         public string removeHTML(string htmlString)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(htmlString, @"<(.|\n)*?>", string.Empty);
+        }
+         ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

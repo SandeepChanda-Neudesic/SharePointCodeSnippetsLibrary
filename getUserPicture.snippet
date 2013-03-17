@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Get User Picture</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives a public method GetUserPicture which will return you the User Profile Picture URL for the given User.</Description>
+      <Shortcut>getUserPicture</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Code Language="csharp">
+        <![CDATA[
+         
+        public string GetUserPicture(SPSite site, long userAccountRecordId)
+        {
+            string result = string.Empty;
+            try
+            {
+                SPServiceContext context = SPServiceContext.GetContext(site);
+                UserProfileManager upm = new UserProfileManager(context);
+                UserProfile up = upm.GetUserProfile(userAccountRecordId);
+
+                if (up["PictureUrl"].Value != null)
+                {
+                    result = up["PictureUrl"].Value.ToString();
+                }
+                else
+                {
+                    result = string.Empty;
+                }
+            }
+            catch (Exception e)
+            {
+                result = "Error";
+            }
+            return result;
+        }
+         
+         ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

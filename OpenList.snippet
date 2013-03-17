@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Open SPList</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives code to open a SPList.</Description>
+      <Shortcut>openlist</Shortcut>
+
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Declarations>
+        <Literal>
+          <ID>spsite</ID>
+          <ToolTip>Replace with your site URL.</ToolTip>
+          <Default>"http://Neudesic.com/sites/MyTestSite"</Default>
+        </Literal>
+        <Literal>
+          <ID>splist</ID>
+          <ToolTip>Replace with your list name.</ToolTip>
+          <Default>"MyCustomList"</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp">
+        <![CDATA[SPSite oSite = new SPSite($spsite$);
+         SPWeb oWeb = oSite.OpenWeb();
+         SPList oList = oWeb.Lists[$splist$];]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>

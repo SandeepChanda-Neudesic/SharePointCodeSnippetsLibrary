@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets
+    xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Get User Profile</Title>
+      <Author>Naveen Maddipati</Author>
+      <Description>It gives a public method GetUserProfile which will return you the User, loading required information from its profile.</Description>
+      <Shortcut>getUserProfile</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>Microsoft.SharePoint</Namespace>
+        </Import>
+      </Imports>
+      <References>
+        <Reference>
+          <Assembly>Microsoft.SharePoint.dll</Assembly>
+        </Reference>
+      </References>
+      <Code Language="csharp">
+        <![CDATA[
+         
+        public User GetUserProfile(SPSite site, User user)
+        {
+            try
+            {
+                SPServiceContext context = SPServiceContext.GetContext(site);
+                UserProfileManager profileManager = new UserProfileManager(context);
+                UserProfile profile = profileManager.GetUserProfile(user.AccountName);
+
+                if (profile != null)
+                {
+                
+                    // Your code goes here. For example see the below commented code.
+                
+                    // if (profile[Constants.User_Department].Value != null)
+                        // user.Department = profile[Constants.User_Department].Value.ToString();
+                    // if (profile[Constants.User_Project].Value != null)
+                        // user.Project = profile[Constants.User_Project].Value.ToString();
+                    // if (profile[Constants.User_Role].Value != null)
+                        // user.Role = profile[Constants.User_Role].Value.ToString();
+                }
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+            return user;
+        }
+         
+         ]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
